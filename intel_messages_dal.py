@@ -169,6 +169,8 @@ class IntelMessagesDAL:
 
     def get_by_unit(self, unit: str)-> list[dict]:
         # All messages where unit matches, ordered by created_at DESC...
+        
+
     def get_by_classification(self, classification: str)-> list[dict]:
         # All messages at the given classification level...
     def get_by_unit_and_classification(self, unit: str, classification: str)
