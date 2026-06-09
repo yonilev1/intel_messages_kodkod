@@ -150,6 +150,23 @@ class IntelMessagesDAL:
         # Commit the transaction
         # Return True if a row was deleted, False if the id did not exist...
         # --------------------------------------------------------------- queries
+        """
+        delete message from db
+        """
+        try:
+            cursor = self.connection.cursor()
+            cursor.execute(f"""
+            DELETE FROM intel_messages WHERE id = %s
+            """, (id,))
+            self.connection.commit()
+            did_delete = cursor.rowcount
+            cursor.close()
+            return did_delete > 0
+        except Exception as e:
+            cursor.close()
+            raise Exception(e)
+
+
     def get_by_unit(self, unit: str)-> list[dict]:
         # All messages where unit matches, ordered by created_at DESC...
     def get_by_classification(self, classification: str)-> list[dict]:
