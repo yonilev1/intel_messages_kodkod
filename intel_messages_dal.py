@@ -194,13 +194,39 @@ class IntelMessagesDAL:
         except Exception as e:
             raise Exception(e)
 
-    def get_by_unit_and_classification(self, unit: str, classification: str)
-    > list[dict]:
-    # Both filters combined with AND
-    ...
+
+    def get_by_unit_and_classification(self, unit: str, classification: str)-> list[dict]:
+    # Both filters combined with AND...
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT * FROM intel_messages WHERE classification = %s AND unit = %s
+            """, (classification, unit))
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+
+
     def get_distinct_units(self)-> list[str]:
     # All unique unit values — return a plain list of strings, not dicts
-    ...
+        """
+        get all distinct units
+        """
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute(f"""
+            SELECT DISTINCT unit FROM soldiers
+            """)
+            rows = cursor.fetchall()
+            rows = [row['unit'] for row in rows]
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+        
+
     def search_content(self, term: str)-> list[dict]:
     # Rows where content contains term (partial match)
     ...
