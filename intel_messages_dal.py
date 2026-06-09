@@ -55,7 +55,7 @@ class IntelMessagesDAL:
         # ------------------------------------------------------------ read (all)
         cursor = self.connection.cursor(dictionary=True)
         cursor.execute("""
-        SELECT COLUMN_NAME as `column`, DATA_TYPE as `dt`
+        SELECT COLUMN_NAME as `column`, DATA_TYPE as `data type`
         FROM INFORMATION_SCHEMA.COLUMNS
         WHERE TABLE_SCHEMA = %s and TABLE_NAME = 'intel_messages';
         """, (self.database,))

@@ -30,9 +30,20 @@ class UpdateMessage(BaseModel):
 
 app = FastAPI()
 
+
+@app.get('/schema')
+def get_schema():
+    return intel_messages_dal_instatnce.get_schema()
+
+
 @app.get('/messages')
 def get_all_messages():
     return intel_messages_dal_instatnce.get_all()
+
+
+@app.get('/messages/units')
+def get_units():
+    return intel_messages_dal_instatnce.get_distinct_units()
 
 
 @app.get('/messages/{id}')
