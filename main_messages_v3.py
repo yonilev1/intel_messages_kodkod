@@ -3,6 +3,7 @@ from intel_messages_dal import IntelMessagesDAL
 import logger
 from pydantic import BaseModel
 import mysql.connector
+from typing import Optional
 
 app = FastAPI()
 my_logger = logger.get_logger('DAL')
@@ -17,14 +18,14 @@ intel_messages_dal_instatnce = IntelMessagesDAL('127.0.0.1', 'root', 'root', 'so
 
 class AddMessage(BaseModel):
     unit: str
-    classification: int
+    classification: str
     content: str
     source:str | None = None
 
 
 class UpdateMessage(BaseModel):
     unit: str | None = None
-    classification: int | None = None
+    classification: str | None = None
     content: str | None = None
     source:str | None = None
 
@@ -37,7 +38,7 @@ def get_schema():
 
 
 @app.get('/messages')
-def get_all_messages(unit:str = Query(defoult=None) , classification:int =  Query(defoult=None)):
+def get_all_messages(unit:Optional[str] = Query(default=None), classification:Optional[str] =  Query(default=None)):
     if unit and classification:
         return intel_messages_dal_instatnce.get_by_unit_and_classification(unit, classification)
     
@@ -58,7 +59,7 @@ def get_units():
 
 @app.get('/messages/search')
 def search_by_message_content(content):
-    if len(content) == 0:
+    if content == "" or content == " ":
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='content to search is missing')
     return intel_messages_dal_instatnce.search_content(content)
 

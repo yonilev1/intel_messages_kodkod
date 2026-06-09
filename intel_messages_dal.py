@@ -86,7 +86,7 @@ class IntelMessagesDAL:
         get message by id
         """
         cursor = self.connection.cursor(dictionary=True)
-        cursor.execute("SELECT * FROM intel_messages WHERE id = %s", (id,))
+        cursor.execute("SELECT * FROM intel_messages WHERE id = %s", (message_id,))
         row = cursor.fetchone()
         cursor.close()
         return row
@@ -102,7 +102,7 @@ class IntelMessagesDAL:
         create new message, returns new message id
         """
         cursor = self.connection.cursor()
-        if classification not in [1,2,3,4]:
+        if classification not in IntelMessagesDAL.VALID_CLASSIFICATIONS:
             raise ValueError(f'classification should be 1-4')
         try:
             cursor.execute("""
@@ -128,8 +128,9 @@ class IntelMessagesDAL:
         update message data
         """
         cursor = self.connection.cursor()
-        if data['classification'] not in [1,2,3,4]:
-            raise ValueError(f'classification should be 1-4')
+        if  'classification' in data.keys():
+            if data['classification'] not in IntelMessagesDAL.VALID_CLASSIFICATIONS:
+                raise ValueError(f'classification should be 1-4')
 
         in_parts = [f'{key} = %s' for key in data.keys()]
         in_str = ", ".join(in_parts)
@@ -159,7 +160,7 @@ class IntelMessagesDAL:
             cursor = self.connection.cursor()
             cursor.execute(f"""
             DELETE FROM intel_messages WHERE id = %s
-            """, (id,))
+            """, (message_id,))
             self.connection.commit()
             did_delete = cursor.rowcount
             cursor.close()
