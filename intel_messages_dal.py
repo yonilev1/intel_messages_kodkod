@@ -3,7 +3,7 @@ import logger
 
 class IntelMessagesDAL:
     VALID_CLASSIFICATIONS = ('unclassified', 'confidential', 'secret','top_secret')
-    def __init__(self, host: str, user: str, password: str, database: str,logger: logger):
+    def __init__(self, host: str, user: str, password: str, database: str,logger: logger, connection):
         # Store connection parameters on self
         # store logger object reference in self...
         # ------------------------------------------------------------------ setup
@@ -13,10 +13,10 @@ class IntelMessagesDAL:
         self.password = password
         self.database = database
         self.logger = logger
-        self.connection = self.get_conn()
+        self.connection = connection
 
 
-    def get_conn(self):
+    """def get_conn(self):
         #create connection from params stored in self 
         #store the connection in self 
         #return conn
@@ -26,7 +26,7 @@ class IntelMessagesDAL:
         user=self.user,
         password=self.password,
         database=self.database)
-        return self.conn
+        return self.conn"""
     
 
     def setup(self)-> None:
@@ -264,6 +264,6 @@ class IntelMessagesDAL:
             raise Exception(e)
         
 
-    def close(self)-> None:
+    """def close(self)-> None:
     # Close the cursor and the connection...
-        self.connection.close()
+        self.connection.close()"""

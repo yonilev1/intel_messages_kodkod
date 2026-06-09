@@ -2,10 +2,18 @@ from fastapi import FastAPI, status, HTTPException
 from intel_messages_dal import IntelMessagesDAL
 import logger
 from pydantic import BaseModel
+import mysql.connector
 
 app = FastAPI()
 my_logger = logger.get_logger('DAL')
-intel_messages_dal_instatnce = IntelMessagesDAL('127.0.0.1', 'root', 'root', 'soldiers_db', my_logger)
+connection = mysql.connector.connect(
+        host='127.0.0.1',
+        port=3306,
+        user='root',
+        password='root',
+        database='soldiers_db'
+    )
+intel_messages_dal_instatnce = IntelMessagesDAL('127.0.0.1', 'root', 'root', 'soldiers_db', my_logger, connection)
 
 class AddMessage(BaseModel):
     unit: str
@@ -51,7 +59,7 @@ def add_message(message_details:AddMessage):
 def update_message(id:int, message:UpdateMessage):
     try:
         dict_message = message.model_dump(exclude_unset=True)
-        did_update =db.update(id, dict_message)
+        did_update =intel_messages_dal_instatnce.update(id, dict_message)
         if did_update:
             return {"message": "message updated successfully"}
         else:
@@ -68,7 +76,7 @@ def update_message(id:int, message:UpdateMessage):
 @app.delete('/messages/{id}')
 def delete_messaeg(id:int):
     try:
-        did_delete =db.delete(id)
+        did_delete =intel_messages_dal_instatnce.delete(id)
         if did_delete != 0:
             return {"message": "Message deleted successfully"}
         else:
