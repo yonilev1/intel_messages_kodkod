@@ -88,12 +88,30 @@ class IntelMessagesDAL:
         cursor.close()
         return row
 
-    def create(self, unit: str, classification: str, content: str, source: str
+    def create(self, unit: str, classification: int, content: str, source: str
     | None)-> int:
         # Insert a new row (do NOT pass created_at — let MySQL set it)
         # Commit the transaction
         # Return the auto-generated id (lastrowid)...
         # ----------------------------------------------------------------- update
+        """
+        create new message, returns new message id
+        """
+        cursor = self.connection.cursor()
+        if classification not in [1,2,3,4]:
+            raise ValueError(f'classification should be 1-4')
+        try:
+            cursor.execute("""
+            INSERT INTO intel_messages (unit, classification, content, source) VALUES (%s, %s, %s, %s)
+            """, (unit, classification, content, source))
+            new_id = cursor.lastrowid
+            self.connection.commit()
+            cursor.close()
+            return new_id
+        except Exception as e:
+            cursor.close()
+            raise Exception(e)
+
     def update(self, message_id: int, data: dict)-> bool:
         # Build a dynamic SET clause from the keys in data
         # Only update the columns that are present in data
