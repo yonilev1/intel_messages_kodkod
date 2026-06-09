@@ -169,10 +169,31 @@ class IntelMessagesDAL:
 
     def get_by_unit(self, unit: str)-> list[dict]:
         # All messages where unit matches, ordered by created_at DESC...
-        
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT * FROM intel_messages WHERE unit = %s
+            """, (unit,))
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+
 
     def get_by_classification(self, classification: str)-> list[dict]:
         # All messages at the given classification level...
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT * FROM intel_messages WHERE classification = %s
+            """, (classification,))
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+
     def get_by_unit_and_classification(self, unit: str, classification: str)
     > list[dict]:
     # Both filters combined with AND
