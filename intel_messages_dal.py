@@ -228,12 +228,40 @@ class IntelMessagesDAL:
         
 
     def search_content(self, term: str)-> list[dict]:
-    # Rows where content contains term (partial match)
-    ...
+    # Rows where content contains term (partial match)...
+        """
+        get by content
+        """
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute("""
+            SELECT * FROM soldiers WHERE name LIKE %s
+            """, (f'%{term}%',))
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+
+
     def get_missing_source(self)-> list[dict]:
-    # Rows where source IS NULL
-    ...
+    # Rows where source IS NULL...
     # ----------------------------------------------------------------- close
+        """
+        get messages with missing source
+        """
+        try:
+            cursor = self.connection.cursor(dictionary=True)
+            cursor.execute(f"""
+            SELECT * FROM intel_messages WHERE source IS NULL
+            """)
+            rows = cursor.fetchall()
+            cursor.close()
+            return rows
+        except Exception as e:
+            raise Exception(e)
+        
+
     def close(self)-> None:
-    # Close the cursor and the connection
-    ...
+    # Close the cursor and the connection...
+        self.connection.close()
