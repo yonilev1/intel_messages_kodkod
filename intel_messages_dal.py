@@ -76,6 +76,7 @@ class IntelMessagesDAL:
         cursor.close()
         return rows
 
+
     def get_by_id(self, message_id: int)-> dict | None:
         # Return the single row where id = message_id, or None if not found...
         # ----------------------------------------------------------------- create
@@ -87,6 +88,7 @@ class IntelMessagesDAL:
         row = cursor.fetchone()
         cursor.close()
         return row
+
 
     def create(self, unit: str, classification: int, content: str, source: str
     | None)-> int:
@@ -112,6 +114,7 @@ class IntelMessagesDAL:
             cursor.close()
             raise Exception(e)
 
+
     def update(self, message_id: int, data: dict)-> bool:
         # Build a dynamic SET clause from the keys in data
         # Only update the columns that are present in data
@@ -119,6 +122,29 @@ class IntelMessagesDAL:
         # Return True if a row was changed, False if the id did not exist
         # Never use f-strings for values — only %s...
         # ----------------------------------------------------------------- delete
+        """
+        update message data
+        """
+        cursor = self.connection.cursor()
+        if data['classification'] not in [1,2,3,4]:
+            raise ValueError(f'classification should be 1-4')
+
+        in_parts = [f'{key} = %s' for key in data.keys()]
+        in_str = ", ".join(in_parts)
+        parsed_data = list(data.values()) + [message_id]
+        try:
+            cursor.execute(f"""
+        UPDATE intel_messages SET {in_str} WHERE id = %s
+        """, parsed_data)
+            self.connection.commit()
+            did_update = cursor.rowcount
+            cursor.close()
+            return did_update > 0
+        except Exception as e:
+            cursor.close()
+            raise Exception(e)
+
+
     def delete(self, message_id: int)-> bool:
         # Delete the row where id = message_id
         # Commit the transaction
