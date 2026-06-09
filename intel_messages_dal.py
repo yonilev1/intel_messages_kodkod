@@ -53,7 +53,13 @@ class IntelMessagesDAL:
         # Query INFORMATION_SCHEMA.COLUMNS for the intel_messages table
         # Return a list of dicts: [{"column": ..., "type": ...}, ...]...
         # ------------------------------------------------------------ read (all)
-
+        cursor = self.connection.cursor(dictionary=True)
+        cursor.execute("""
+        DESCRIBE intel_messages;
+        """)
+        rows = cursor.fetchall()
+        cursor.close()
+        return rows
 
 
     def get_all(self)-> list[dict]:
@@ -73,6 +79,15 @@ class IntelMessagesDAL:
     def get_by_id(self, message_id: int)-> dict | None:
         # Return the single row where id = message_id, or None if not found...
         # ----------------------------------------------------------------- create
+        """
+        get message by id
+        """
+        cursor = self.connection.cursor(dictionary=True)
+        cursor.execute("SELECT * FROM intel_messages WHERE id = %s", (id,))
+        row = cursor.fetchone()
+        cursor.close()
+        return row
+
     def create(self, unit: str, classification: str, content: str, source: str
     | None)-> int:
         # Insert a new row (do NOT pass created_at — let MySQL set it)
