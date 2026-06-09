@@ -1,4 +1,4 @@
-from fastapi import FastAPI, status, HTTPException
+from fastapi import FastAPI, status, HTTPException, Query
 from intel_messages_dal import IntelMessagesDAL
 import logger
 from pydantic import BaseModel
@@ -37,8 +37,18 @@ def get_schema():
 
 
 @app.get('/messages')
-def get_all_messages():
-    return intel_messages_dal_instatnce.get_all()
+def get_all_messages(unit:str = Query(defoult=None) , classification:int =  Query(defoult=None)):
+    if unit and classification:
+        return intel_messages_dal_instatnce.get_by_unit_and_classification(unit, classification)
+    
+    elif unit:
+        return intel_messages_dal_instatnce.get_by_unit(unit)
+    
+    elif classification:
+        return intel_messages_dal_instatnce.get_by_classification(classification)
+    
+    else:
+        return intel_messages_dal_instatnce.get_all()
 
 
 @app.get('/messages/units')
@@ -46,11 +56,24 @@ def get_units():
     return intel_messages_dal_instatnce.get_distinct_units()
 
 
-@app.get('/messages/{id}')
-def get_message_by_id(id:int):
-    message = intel_messages_dal_instatnce.get_by_id(id)
+@app.get('/messages/search')
+def search_by_message_content(content):
+    if len(content) == 0:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='content to search is missing')
+    return intel_messages_dal_instatnce.search_content(content)
+
+
+@app.get('/messages/missing-source')
+def get_messages_with_missing_source():
+    return intel_messages_dal_instatnce.get_missing_source()
+
+
+
+@app.get('/messages/{message_id}')
+def get_message_by_id(message_id:int):
+    message = intel_messages_dal_instatnce.get_by_id(message_id)
     if not message:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {id} was not found', )
+        raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {message_id} was not found', )
     return message
 
 
@@ -66,15 +89,15 @@ def add_message(message_details:AddMessage):
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
-@app.put('/messages/{id}')
-def update_message(id:int, message:UpdateMessage):
+@app.put('/messages/{message_id}')
+def update_message(message_id:int, message:UpdateMessage):
     try:
         dict_message = message.model_dump(exclude_unset=True)
-        did_update =intel_messages_dal_instatnce.update(id, dict_message)
+        did_update =intel_messages_dal_instatnce.update(message_id, dict_message)
         if did_update:
             return {"message": "message updated successfully"}
         else:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {id} was not found')
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {message_id} was not found')
     except Exception as e:
         if isinstance(e, ValueError):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
@@ -84,14 +107,14 @@ def update_message(id:int, message:UpdateMessage):
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@app.delete('/messages/{id}')
-def delete_messaeg(id:int):
+@app.delete('/messages/{message_id}')
+def delete_messaeg(message_id:int):
     try:
-        did_delete =intel_messages_dal_instatnce.delete(id)
+        did_delete =intel_messages_dal_instatnce.delete(message_id)
         if did_delete != 0:
             return {"message": "Message deleted successfully"}
         else:
-            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {id} was not found')
+            raise HTTPException(status.HTTP_404_NOT_FOUND, detail=f'message with id {message_id} was not found')
     except Exception as e:
         if isinstance(e, ValueError):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))

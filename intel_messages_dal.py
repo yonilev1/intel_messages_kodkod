@@ -219,7 +219,7 @@ class IntelMessagesDAL:
         try:
             cursor = self.connection.cursor(dictionary=True)
             cursor.execute(f"""
-            SELECT DISTINCT unit FROM soldiers
+            SELECT DISTINCT unit FROM intel_messages
             """)
             rows = cursor.fetchall()
             rows = [row['unit'] for row in rows]
@@ -237,7 +237,7 @@ class IntelMessagesDAL:
         try:
             cursor = self.connection.cursor(dictionary=True)
             cursor.execute("""
-            SELECT * FROM soldiers WHERE name LIKE %s
+            SELECT * FROM intel_messages WHERE content LIKE %s
             """, (f'%{term}%',))
             rows = cursor.fetchall()
             cursor.close()
