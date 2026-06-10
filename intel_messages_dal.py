@@ -15,19 +15,6 @@ class IntelMessagesDAL:
         self.logger = logger
 
 
-    """def get_conn(self):
-        #create connection from params stored in self 
-        #store the connection in self 
-        #return conn
-        self.conn = mysql.connector.connect(
-        host=self.host,
-        port=3306,
-        user=self.user,
-        password=self.password,
-        database=self.database)
-        return self.conn"""
-    
-
     def setup(self, connection)-> None:
         # Create the intel_messages table if it does not exist
         # Column definitions: id, unit, classification (ENUM), content,source, created_at
@@ -90,12 +77,12 @@ class IntelMessagesDAL:
         cursor = connection.cursor(dictionary=True)
         cursor.execute("SELECT * FROM intel_messages WHERE id = %s", (message_id,))
         row = cursor.fetchone()
-        connection.close()
         cursor.close()
+        connection.close()
         return row
 
 
-    def create(self, unit: str, classification: int, content: str, source: str
+    def create(self, unit: str, classification: str, content: str, source: str
     | None, connection)-> int:
         # Insert a new row (do NOT pass created_at — let MySQL set it)
         # Commit the transaction
@@ -117,8 +104,8 @@ class IntelMessagesDAL:
             connection.close()
             return new_id
         except Exception as e:
-            connection.close()
             cursor.close()
+            connection.close()
             raise Exception(e)
 
 
@@ -150,8 +137,8 @@ class IntelMessagesDAL:
             connection.close()
             return did_update > 0
         except Exception as e:
-            connection.close()
             cursor.close()
+            connection.close()
             raise Exception(e)
 
 
@@ -184,13 +171,14 @@ class IntelMessagesDAL:
         try:
             cursor = connection.cursor(dictionary=True)
             cursor.execute("""
-            SELECT * FROM intel_messages WHERE created_at  = %s
-            ORDER BY unit desc""", (unit,))
+            SELECT * FROM intel_messages WHERE unit  = %s
+            ORDER BY created_at desc""", (unit,))
             rows = cursor.fetchall()
             cursor.close()
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
 
@@ -207,6 +195,7 @@ class IntelMessagesDAL:
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
 
@@ -223,6 +212,7 @@ class IntelMessagesDAL:
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
 
@@ -243,6 +233,7 @@ class IntelMessagesDAL:
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
         
@@ -262,6 +253,7 @@ class IntelMessagesDAL:
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
 
@@ -282,10 +274,7 @@ class IntelMessagesDAL:
             connection.close()
             return rows
         except Exception as e:
+            cursor.close()
             connection.close()
             raise Exception(e)
         
-
-    """def close(self)-> None:
-    # Close the cursor and the connection...
-        self.connection.close()"""

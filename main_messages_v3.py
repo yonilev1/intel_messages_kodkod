@@ -62,7 +62,7 @@ def get_units():
 
 @app.get('/messages/search')
 def search_by_message_content(content):
-    if content == "" or content == " ":
+    if content == "" or content == " " or not content:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='content to search is missing')
     return intel_messages_dal_instatnce.search_content(content, get_connection())
 
@@ -100,7 +100,7 @@ def update_message(message_id:int, message:UpdateMessage):
         did_update =intel_messages_dal_instatnce.update(message_id, dict_message, get_connection())
     except Exception as e:
         if isinstance(e, ValueError):
-            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail=str(e))
         if isinstance(e, KeyError):
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
         else:
